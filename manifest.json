@@ -11,12 +11,18 @@
         "default_title": "Popup",
         "default_popup": "popup/popup.html"
     },
+    "host_permissions": [
+        "https://api.dicebear.com/*"
+    ],
+    "permissions": [
+        "storage"
+    ],
     "background": {
         "service_worker": "service_worker.js"
     },
     "content_scripts": [{
         "js": ["content.js"],
         "css": ["content.css"],
-        "matches": ["*://*/*"]
+        "matches": ["https://egela.ehu.eus/user/*"]
     }]
 }
