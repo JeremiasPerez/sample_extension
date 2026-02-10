@@ -1,4 +1,6 @@
 
+const styleKey = 'USER_STYLE'
+
 const blob2base64 = async (blob, mimeType) => {
   const buf = await blob.arrayBuffer()
   const bytes = new Uint8Array(buf)
@@ -19,18 +21,21 @@ const esperar = (ms) => {
 }
 
 const getAvatar = async (userId, sendResponse) => {
-  const key = `AVATAR_${userId}`
+
+  const opts = await chrome.storage.local.get([styleKey])
+  const style = opts[styleKey] == null ? 'pixel-art' : opts[styleKey]
+
+  const key = `AVATAR_${style}_${userId}`
   const ret = await chrome.storage.local.get([key])
   if (ret[key] != null){
       sendResponse({ok: true, img: ret[key]})
       return
   }
   
-  const style = 'pixel-art'
   const url = `https://api.dicebear.com/9.x/${style}/png?seed=${userId}`
 
   const response = await fetch(url)
-  console.log(response)
+  if (!response.ok) throw new Error('ha habido un problema con la api de dicebear')
   const avatar = await response.blob()
   const imgBase64 = await blob2base64(avatar, 'image/png')
   sendResponse({ok: true, img: imgBase64})
@@ -46,7 +51,6 @@ const addToQueue = (studentId, sendResponse) => {
       await esperar(2000)
       getAvatar(studentId, sendResponse)
   })
-  ultimoAlumno = p
   return p
 }
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
